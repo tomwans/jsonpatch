@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -149,7 +150,16 @@ func makePath(path string, newPart interface{}) string {
 
 // diff returns the (recursive) difference between a and b as an array of JsonPatchOperations.
 func diff(a, b map[string]interface{}, path string, patch []JsonPatchOperation) ([]JsonPatchOperation, error) {
-	for key, bv := range b {
+	// walk the keys in sorted order
+	bkeys := make([]string, 0, len(b))
+	for key := range b {
+		bkeys = append(bkeys, key)
+	}
+	sort.Strings(bkeys)
+
+	for _, key := range bkeys {
+		bv := b[key]
+
 		p := makePath(path, key)
 		av, ok := a[key]
 		// value was added
