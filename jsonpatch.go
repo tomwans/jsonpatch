@@ -237,6 +237,8 @@ func handleValues(av, bv interface{}, p string, patch []JsonPatchOperation) ([]J
 func compareArray(av, bv []interface{}, p string) []JsonPatchOperation {
 	retval := []JsonPatchOperation{}
 	//	var err error
+
+	aNotInB := 0
 	for i := len(av) - 1; i >= 0; i-- {
 		v := av[i]
 		found := false
@@ -247,16 +249,32 @@ func compareArray(av, bv []interface{}, p string) []JsonPatchOperation {
 			}
 		}
 		if !found {
+			aNotInB++
 			retval = append(retval, NewPatch("remove", makePath(p, i), nil))
 		}
 	}
 
+	// if the number of a elements not in b is the same as the
+	// length of a then we're replacing every element in a
+	replaceA := aNotInB == len(av)
+
+	if replaceA {
+		// since we're replacing a we don't need the remove ops anymore
+		retval = []JsonPatchOperation{}
+	}
+
 	for i, v := range bv {
 		found := false
-		for _, v2 := range av {
-			if reflect.DeepEqual(v, v2) {
-				found = true
-				break
+		if replaceA && i < len(av) {
+			// if we're in the existing a space still, replace things
+			retval = append(retval, NewPatch("replace", makePath(p, i), v))
+			continue
+		} else {
+			for _, v2 := range av {
+				if reflect.DeepEqual(v, v2) {
+					found = true
+					break
+				}
 			}
 		}
 		if !found {
