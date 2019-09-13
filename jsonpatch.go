@@ -237,7 +237,8 @@ func handleValues(av, bv interface{}, p string, patch []JsonPatchOperation) ([]J
 func compareArray(av, bv []interface{}, p string) []JsonPatchOperation {
 	retval := []JsonPatchOperation{}
 	//	var err error
-	for i, v := range av {
+	for i := len(av) - 1; i >= 0; i-- {
+		v := av[i]
 		found := false
 		for _, v2 := range bv {
 			if reflect.DeepEqual(v, v2) {
