@@ -269,7 +269,8 @@ func compareArray(av, bv []interface{}, p string) []JsonPatchOperation {
 			// if we're in the existing a space still, replace things
 			retval = append(retval, NewPatch("replace", makePath(p, i), v))
 			continue
-		} else {
+		} else if !replaceA {
+			// only search A if we're not replacing it
 			for _, v2 := range av {
 				if reflect.DeepEqual(v, v2) {
 					found = true
