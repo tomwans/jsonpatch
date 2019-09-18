@@ -10,6 +10,25 @@ import (
 var arrayA = `{"containers": ["a", "b"]}`
 var arrayB = `{"containers": ["c", "d", "e"]}`
 
+var simpleListA = `{"x": ["a"]}`
+var simpleListAB = `{"x": ["a", "b"]}`
+var simpleListAC = `{"x": ["a", "c"]}`
+
+func TestListAddAndRemove(t *testing.T) {
+	patch, e := CreatePatch([]byte(simpleListA), []byte(simpleListAC))
+	assert.NoError(t, e)
+	assert.Equal(t, patch, []JsonPatchOperation{
+		{Operation: "add", Path: "/x/1", Value: "c"},
+	}, "they should be equal")
+
+	patch, e = CreatePatch([]byte(simpleListAB), []byte(simpleListAC))
+	assert.NoError(t, e)
+	assert.Equal(t, patch, []JsonPatchOperation{
+		{Operation: "replace", Path: "/x/1", Value: "c"},
+	}, "they should be equal")
+
+}
+
 func TestPatchTwoCompletelyDifferentArrays(t *testing.T) {
 	patch, err := CreatePatch([]byte(arrayA), []byte(arrayB))
 
